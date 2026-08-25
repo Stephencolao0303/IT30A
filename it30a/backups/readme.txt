@@ -11,3 +11,5 @@ C:\dev\it30a\backups
 UTILITY commands
 \! cls 
 mysqldump -u root -p --databases library_db > C:\dev\it30a\backups\08182026_library_db.sql
+
+mysqldump -u root -p --databases library_db > D:\IT30A\it30a\backups\%date:~-4%_%date:~4,2%_%date:~7,2%_%time:~0,2%_%time:~3,2%_%time:~6,2%_library_db.sql"
