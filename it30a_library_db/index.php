@@ -1,7 +1,7 @@
 <?php
 // Database Connection
 $host = 'localhost';
-$db = 'it30a_library_db';
+$db = 'it30A_library_db';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
@@ -27,7 +27,34 @@ session_start();
 $section = $_GET['section'] ?? 'students';
 
 // CRUD Operations
-$actions = $_GET['action'] ?? '';
+$action = $_GET['action'] ?? '';
+
+
+//--------------------------------------------------------
+// Add Student
+//--------------------------------------------------------
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $student_first_name = $_POST['student_first_name'] ?? '';
+    $student_last_name = $_POST['student_last_name'] ?? '';
+    $student_course = $_POST['student_course'] ?? '';
+
+    $stmt = $pdo->prepare("
+        INSERT INTO student
+        (student_first_name, student_last_name, student_course)
+        VALUES (?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $student_first_name,
+        $student_last_name,
+        $student_course
+    ]);
+
+    header("Location: index.php?section=students");
+    exit;
+}
 
 
 //--------------------------------------------------------
@@ -54,6 +81,25 @@ if ($section === 'students') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library System</title>
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: none;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: bold;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -72,58 +118,109 @@ if ($section === 'students') {
 
         <h1>Students</h1>
 
-        <table border="1" cellpadding="8" cellspacing="0">
+        <p>
+            <a href="index.php?section=students&action=create">
+                Add Student
+            </a>
+        </p>
 
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Course</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+        <?php if ($action === 'create'): ?>
 
-            <tbody>
+            <h2>Add student</h2>
 
-                <?php foreach ($students as $student): ?>
+            <form method="POST">
 
+                <p>
+                    <label>First Name</label>
+                    <br>
+                    <input type="text"
+                           name="student_first_name"
+                           required
+                    />
+                </p>
+
+                <p>
+                    <label>Last Name</label>
+                    <br>
+                    <input type="text"
+                           name="student_last_name"
+                           required
+                    />
+                </p>
+
+                <p>
+                    <label>Course</label>
+                    <br>
+                    <input type="text"
+                           name="student_course"
+                           required
+                    />
+                </p>
+
+                <button type="submit">
+                    Save
+                </button>
+
+                <a href="index.php?section=students">
+                    Cancel
+                </a>
+
+            </form>
+
+        <?php else: ?>
+
+            <table>
+
+                <thead>
                     <tr>
-
-                        <td>
-                            <?= htmlspecialchars($student['student_id']) ?>
-                        </td>
-
-                        <td>
-                            <?= htmlspecialchars($student['student_first_name']) ?>
-                        </td>
-
-                        <td>
-                            <?= htmlspecialchars($student['student_last_name']) ?>
-                        </td>
-
-                        <td>
-                            <?= htmlspecialchars($student['student_course']) ?>
-                        </td>
-
-                        <td>
-                            <?= htmlspecialchars($student['student_created_at']) ?>
-                        </td>
-
-                        <td>
-                            <a href="#">Edit</a>
-                            |
-                            <a href="#">Delete</a>
-                        </td>
-
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Course</th>
+                        <th>Created At</th>
+                        <th>Action</th>
                     </tr>
+                </thead>
 
-                <?php endforeach; ?>
+                <tbody>
 
-            </tbody>
+                    <?php foreach ($students as $student): ?>
 
-        </table>
+                        <tr>
+                            <td>
+                                <?= htmlspecialchars($student['student_id']) ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($student['student_first_name']) ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($student['student_last_name']) ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($student['student_course']) ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($student['student_created_at']) ?>
+                            </td>
+
+                            <td>
+                                <a href="#">Edit</a>
+                                |
+                                <a href="#">Delete</a>
+                            </td>
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                </tbody>
+
+            </table>
+
+        <?php endif; ?>
 
     <?php endif; ?>
 
