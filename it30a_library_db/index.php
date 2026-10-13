@@ -393,7 +393,22 @@ if($section === 'borrow'){
     $borrows = $stmt->fetchAll();
 
 }
+// Borrow a book
+if($section==='borrow' && $action==='return'){
+    $borrowId = (int) ($_GET['id'] ?? 0);
 
+    $stmt = $pdo->prepare("
+        UPDATE borrow
+        SET borrow_return_date = CURRENT_TIMESTAMP
+        WHERE borrow_id=?
+        ");
+    $stmt -> execute([$borrowId]);
+
+    $_SESSION['alert'] = 'Book returned successfully.';
+
+    header("Location: index.php?section=borrow");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -778,58 +793,67 @@ if($section === 'borrow'){
 
         <?php else: ?>
 
-            <h3>Borrowed Books</h3>
+           <h3>Borrowed Books</h3>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Student</th>
-                        <th>Book</th>
-                        <th>Return Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($borrows as $borrow): ?>
-                        <tr>
-                            <td>
-                                <?=htmlspecialchars($borrow['borrow_id']) ?>
-                            </td>
-                            <td>
-                                <?=htmlspecialchars(
-                                    $borrow['student_first_name']
-                                    .' '.
-                                    $borrow['student_last_name']
-                                ) ?>
-                            </td>
-                            <td>
-                                <?=htmlspecialchars(
-                                    $borrow['book_title']
-                                    .' - '.
-                                    $borrow['book_author']
-                                ) ?>
-                            </td>
-                            <td>
-                                <?php if($borrow['borrow_return_date'] === null): ?>
-                                    Not yet returned
-                                <?php else: ?>
-                                    <?=htmlspecialchars($borrow['borrow_return_date']) ?>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if($borrow['borrow_return_date'] === null): ?>
-                                    <a href="index.php?section=borrow&action=return&id=<?= $borrow['borrow_id'] ?>"
-                                       onclick="return confirm('Return this book?')">
-                                        Return
-                                    </a>
-                                <?php else: ?>
-                                    Returned
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach?>
-                </tbody>
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Book</th>
+            <th>Return Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach($borrows as $borrow): ?>
+            <tr>
+                <td>
+                    <?= htmlspecialchars($borrow['borrow_id']) ?>
+                </td>
+                <td>
+                    <?= htmlspecialchars(
+                        $borrow['student_first_name']
+                        . ' ' .
+                        $borrow['student_last_name']
+                    ) ?>
+                </td>
+                <td>
+                    <?= htmlspecialchars(
+                        $borrow['book_title']
+                        . ' - ' .
+                        $borrow['book_author']
+                    ) ?>
+                </td>
+                <td>
+                    <?php if($borrow['borrow_return_date'] === null): ?>
+                        Not returned
+                    <?php else: ?>
+                        <?= htmlspecialchars($borrow['borrow_return_date']) ?>
+                    <?php endif; ?>
+                </td>
+                <td>
+                     <?php if($borrow['borrow_return_date'] === null): ?>
+                     Borrowed
+                     <?php else: ?>
+                     Returned
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php if($borrow['borrow_return_date'] === null): ?>
+                        <a href="index.php?section=borrow&action=return&id=<?= $borrow['borrow_id'] ?>"
+                           onclick="return confirm('Mark this book as returned?')">
+                            Return
+                        </a>
+                    
+                        
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
             </table>
 
         <?php endif;?>
